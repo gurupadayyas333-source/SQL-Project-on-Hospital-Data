@@ -1,63 +1,104 @@
-# SQL Hospital Data Analysis Project
+DROP TABLE IF EXISTS hospital_data; 
 
-## Overview
+CREATE TABLE hospital_data ( 
+hospital_name VARCHAR(100), 
+location VARCHAR(100), 
+department VARCHAR(100), 
+doctors_count INTEGER, 
+patients_count INTEGER, 
+admission_date DATE, 
+discharge_date DATE, 
+medical_expenses NUMERIC(12,2) 
+); 
 
-This project focuses on analyzing hospital operational and financial data using PostgreSQL. The database contains information about hospitals, departments, patient counts, doctor availability, admission and discharge dates, and medical expenses. Through a series of SQL queries, the project extracts valuable insights that can help healthcare organizations improve resource allocation, patient care, and financial planning.
+SELECT * FROM hospital_data;
 
-## Project Objectives
+-- 1. Total Number of Patients -- o Write an SQL query to find the total number of patients across all hospitals. 
+SELECT SUM(patients_count) AS total_patients 
+FROM hospital_data;
 
-* Design and manage a hospital database using SQL.
-* Analyze patient volumes across hospitals and departments.
-* Evaluate doctor availability and hospital performance.
-* Monitor medical expenses and healthcare costs.
-* Generate meaningful reports for operational decision-making.
 
-## Database Structure
+-- 2. Average Number of Doctors per Hospital -- o Retrieve the average count of doctors available in each hospital. 
+SELECT 
+hospital_name, 
+ROUND(AVG(doctors_count), 2) AS avg_doctors 
+FROM hospital_data 
+GROUP BY hospital_name 
+ORDER BY avg_doctors DESC;
 
-The project utilizes a hospital dataset containing:
+-- 3. Top 3 Departments with the Highest Number of Patients -- o Find the top 3 hospital departments that have the highest number of patients. 
+SELECT 
+department, 
+SUM(patients_count) AS total_patients 
+FROM hospital_data 
+GROUP BY department 
+ORDER BY total_patients DESC 
+LIMIT 3;
 
-* Hospital Name
-* Location (City)
-* Department
-* Doctors Count
-* Patients Count
-* Admission Date
-* Discharge Date
-* Medical Expenses
+-- 4. Hospital with the Maximum Medical Expenses -- o Identify the hospital that recorded the highest medical expenses. 
+SELECT 
+hospital_name, 
+SUM(medical_expenses) AS total_expenses 
+FROM hospital_data 
+GROUP BY hospital_name 
+ORDER BY total_expenses DESC 
+LIMIT 1; 
 
-## SQL Concepts Applied
 
-* Table Creation and Data Management (DDL)
-* Aggregate Functions (SUM, AVG, COUNT)
-* Data Filtering and Sorting
-* GROUP BY and ORDER BY Clauses
-* Date Calculations and Analysis
-* Ranking and Top-N Queries
-* Healthcare Performance Reporting
+-- 5. Daily Average Medical Expenses -- o Calculate the average medical expenses per day for each hospital. 
+SELECT 
+hospital_name, 
+ROUND(AVG(medical_expenses), 2) AS daily_avg_expenses 
+FROM hospital_data 
+GROUP BY hospital_name 
+ORDER BY daily_avg_expenses DESC; 
 
-## Key Analyses Performed
+-- 6. Longest Hospital Stay -- o Find the patient with the longest stay by calculating the difference between -- Discharge Date and Admission Date. 
+SELECT 
+hospital_name, 
+department, 
+admission_date, 
+discharge_date, 
+(discharge_date - admission_date) AS stay_days 
+FROM hospital_data 
+ORDER BY stay_days DESC 
+LIMIT 1; 
 
-* Total number of patients across all hospitals
-* Average number of doctors available per hospital
-* Top 3 departments with the highest patient count
-* Hospital with the highest medical expenses
-* Daily average medical expenses by hospital
-* Longest hospital stay analysis
-* Total patients treated per city
-* Average patient stay duration by department
-* Department with the lowest patient count
-* Monthly medical expense trends and reporting
 
-## Skills Demonstrated
+-- 7. Total Patients Treated Per City -- o Count the total number of patients treated in each city. 
+SELECT 
+location AS city, 
+SUM(patients_count) AS total_patients 
+FROM hospital_data 
+GROUP BY location 
+ORDER BY total_patients DESC;
 
-* PostgreSQL
-* SQL Query Writing
-* Data Analysis
-* Healthcare Data Analytics
-* Business Reporting
-* Date and Time Functions
-* Data Aggregation and Insights Generation
+-- 8. Average Length of Stay Per Department -- o Calculate the average number of days patients spend in each department. 
+SELECT 
+department, 
+ROUND( 
+AVG(discharge_date - admission_date), 
+2 
+) AS avg_stay_days 
+FROM hospital_data 
+GROUP BY department 
+ORDER BY avg_stay_days DESC;
 
-## Project Outcome
+-- 9. Identify the Department with the Lowest Number of Patients -- o Find the department with the least number of patients. 
+SELECT 
+department, 
+SUM(patients_count) AS total_patients 
+FROM hospital_data 
+GROUP BY department 
+ORDER BY total_patients ASC 
+LIMIT 1;
 
-This project demonstrates how SQL can be used to transform raw healthcare data into actionable insights. By analyzing patient trends, department performance, hospital expenses, and treatment durations, the project showcases practical applications of SQL in healthcare analytics and operational reporting. It serves as a strong portfolio project for aspiring Data Analysts, Business Analysts, and SQL Developers interested in real-world data analysis scenarios.
+
+--10. Monthly Medical Expenses Report 
+-- • Group the data by month and calculate the total medical expenses for each month. 
+SELECT 
+TO_CHAR(admission_date, 'YYYY-MM') AS month, 
+SUM(medical_expenses) AS total_expenses 
+FROM hospital_data 
+GROUP BY TO_CHAR(admission_date, 'YYYY-MM') 
+ORDER BY month;
